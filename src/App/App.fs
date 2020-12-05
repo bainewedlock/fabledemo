@@ -1,4 +1,4 @@
-﻿module App
+﻿module App.App
 
 open Fable.Core
 open Browser.Types
@@ -19,7 +19,7 @@ ctx.textAlign <- "center"
 ctx.fillText("Hello world!", 200., 200.)
 
 let button1 = getById "button1" :?> HTMLButtonElement
-button1.onclick <- fun e ->  printfn "button clicky: %A" e
+button1.onclick <- fun e ->  printfn "button clicky: %A!" e
 
 printfn "done!"
 
