@@ -22,7 +22,15 @@ let drawPixels (color:string) ps =
 
 let mutable g = Solution.Grid.empty10
 
+let clear () =
+    ctx.save()
+    ctx.setTransform(1.,0.,0.,1.,0.,0.)
+    ctx.clearRect(0., 0., canvas.width, canvas.height)
+    ctx.restore()
+    printfn "clear!"
+
 let draw () =
+    clear()
     drawPixels "#000000" g.sand
     //drawPixels "#000000" g.visited
     ctx.stroke()
