@@ -10,9 +10,6 @@ let ctx = canvas.getContext_2d()
 canvas.width <- 400.
 canvas.height <- 400.
 
-let button1 = getById "button1" :?> HTMLButtonElement
-button1.onclick <- fun e ->  printfn "button clicky: %A!" e
-
 ctx.scale(10., 10.)
 ctx.translate(-490., 10.)
 
@@ -22,7 +19,18 @@ let drawPixels (color:string) ps =
     ctx.strokeStyle <- U3.Case1 color
     ps |> Seq.iter drawPixel
 
-let g = Solution.demogrid
-drawPixels "#000000" g.sand
+let mutable g = Solution.demogrid
 
-ctx.stroke()
+let draw () =
+    drawPixels "#000000" g.sand
+    //drawPixels "#000000" g.visited
+    ctx.stroke()
+
+let iter () =
+    g <- Solution.fillstep g
+    draw ()
+
+let button1 = getById "button1" :?> HTMLButtonElement
+button1.onclick <- fun e -> iter ()
+
+draw ()
