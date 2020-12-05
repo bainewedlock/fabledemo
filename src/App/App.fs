@@ -5,6 +5,7 @@ open Browser.Types
 
 let window = Browser.Dom.window
 let getById (id:string) = window.document.getElementById id
+let getButton x = getById x :?> HTMLButtonElement
 let canvas = getById "canvas" :?> HTMLCanvasElement
 let ctx = canvas.getContext_2d()
 canvas.width <- 400.
@@ -19,18 +20,22 @@ let drawPixels (color:string) ps =
     ctx.strokeStyle <- U3.Case1 color
     ps |> Seq.iter drawPixel
 
-let mutable g = Solution.demogrid
+let mutable g = Solution.Grid.empty10
 
 let draw () =
     drawPixels "#000000" g.sand
     //drawPixels "#000000" g.visited
     ctx.stroke()
 
-let iter () =
-    g <- Solution.fillstep g
+let reset () =
+    g <- Solution.demogrid
     draw ()
 
-let button1 = getById "button1" :?> HTMLButtonElement
-button1.onclick <- fun e -> iter ()
+let iter () =
+    g <- Solution.fillstep (500, 0) g
+    draw ()
 
-draw ()
+(getButton "stepButton").onclick <- fun e -> iter ()
+(getButton "resetButton").onclick <- fun e -> reset ()
+
+reset ()

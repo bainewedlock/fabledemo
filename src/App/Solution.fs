@@ -43,7 +43,6 @@ let parse (input:string) =
     |> List.map parseLine
 
 type Grid = {
-    track : Position List
     maxy : int
     sand : Position Set
     visited : Position Set }
@@ -51,7 +50,6 @@ type Grid = {
 module Grid =
     let empty10 = {
         maxy = 10
-        track = []
         sand = Set.empty
         visited = Set.empty }
     let empty2 = { empty10 with maxy = 2 }
@@ -61,19 +59,16 @@ let move dx dy = function | x, y -> x+dx, y+dy
 let visit pos grid = {
     grid with
         visited = grid.visited.Add pos
-        sand = grid.sand.Add pos
-        track = pos::grid.track }
-
-let skiptrack grid = { grid with track = grid.track.Tail }
+        sand = grid.sand.Add pos }
 
 module Set =
     let addOption x (s:Set<'a>) = if x = None then s else s.Add(x.Value)
 
-let fillstep grid =
-    let rec loop depth grid =
+let fillstep spring grid =
+    let rec loop depth grid track =
         if depth > 100 then failwith "depth exceeded"
-        if grid.track = [] then grid else
-        let pos = grid.track.Head
+        if track = [] then grid else
+        let pos = track.Head
         let left, right, below = move -1 0 pos, move +1 0 pos, move 0 1 pos
         let free pos = not (grid.sand.Contains pos)
         if snd pos >= grid.maxy then grid else
@@ -87,18 +82,19 @@ let fillstep grid =
         loop (depth+1) {
             grid with
                 sand    = grid.sand    |> Set.union (fill |> Set)
-                visited = grid.visited |> Set.union (next |> Set)
-                track   = next @ grid.track.Tail }
+                visited = grid.visited |> Set.union (next |> Set) }
+            (next @ track.Tail)
 
-    loop 0 grid
+    loop 0 grid [spring]
 
 let fill grid callback =
+    let spring = 500, 0
     let rec loop seen grid =
-        let grid' = fillstep grid
+        let grid' = fillstep spring grid
         let seen' = Set.unionMany [grid'.sand; grid'.visited; seen]
         if seen = seen' then seen else
         callback grid'
-        loop seen' { grid' with visited = Set.empty; track = grid.track }
+        loop seen' { grid' with visited = Set.empty; }
     loop Set.empty grid
     |> Set.count
 
@@ -112,7 +108,6 @@ let getMaxy = function
 
 let toGrid lines = { 
     sand  = lines |> Seq.collect generateSand |> Set
-    track = [500, 0]
     maxy  = lines |> Seq.map getMaxy |> Seq.max
     visited = Set.empty }
 
